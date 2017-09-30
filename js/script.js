@@ -1,45 +1,46 @@
-Array.prototype.blankCell = function (o, p) {
-    for (var i = 0; i < o; i++) {
-        this[i] = new Array();
-        for (var j = 0; j < p; j++) {
-            this[i][j] = new Cell(i, j);
-        }
-    }
-};
-
-Array.prototype.inArray = function (val) {
+// Helper functions
+Array.prototype._inArray = function (element) {
     for (var i = 0; i < this.length; i++)
         if (typeof(this[i]) == "object") {
-            return this[i].inArray(val);
+            return this[i]._inArray(element);
         }
-        else if (this[i] == val) {
+        else if (this[i] == element) {
             return true;
         }
     return false;
 };
 
+Array.prototype._formatSceneWithBlankCells = function (iWidth, iHeight) {
+    for (var i = 0; i < iWidth; i++) {
+        this[i] = new Array();
+        for (var j = 0; j < iHeight; j++) {
+            this[i][j] = new Cell(i, j);
+        }
+    }
+};
+
+// "Classes"
 function Scene() {
-    // MARK: game area size
+    // MARK: game scene
     this.width = 15;
     this.height = 15;
-    this.iMacrophagesCount = 3; // could be 1 to 5 macrophages
+    this.iMacrophagesCount = 5; // could be 1 to 5 macrophages
 }
 
 function Cell(y, x) {
-    this.x = x;
-    this.y = y;
-    this.isMacrophage = false;
-    this.isSelected = false;
+    this.iX = x;
+    this.iY = y;
+    this.blIsMacrophage = false;
+    this.blIsSelected = false;
     this.iNumberOfMacrophagesSurround = 0;
-    this.isOpen = false;
-    this.cell = null;
+    this.blIsOpened = false;
+    this.oCell = null; // referenced HTML element
 }
-
 
 var BacSweeper = {
     scene: null,
     iMacrophagesCount: 0,
-    iCellCountMacrophages: null,
+    oCellCountMacrophages: null,
     aSceneBoard: new Array(),
     blGameOver: false,
     blIsFirstClick: false,
@@ -51,49 +52,42 @@ var BacSweeper = {
         // MARK: initialisation of the whole game
         this.scene = new Scene();
         this.iMacrophagesCount = this.scene.iMacrophagesCount;
-        this.iCellCountMacrophages = document.createElement('th');
-        this.iCellCountMacrophages.appendChild(document.createTextNode("Scene - there are " + this.iMacrophagesCount + " Macrophages"));
+        this.oCellCountMacrophages = document.createElement('th');
+        this.oCellCountMacrophages.appendChild(document.createTextNode("Scene - there are " + this.iMacrophagesCount + " Macrophages"));
         this.blGameOver = false;
         this.blIsFirstClick = false;
-        this.aSceneBoard.blankCell(this.scene.height, this.scene.width);
-
-        /*
-        this.aMacrophagesPositions = this.placeMacrophages();
-        this.setMacrophages();
-        this.countSurroundingMacrophages();
-        */
-
-        document.getElementById("bacsweeperboard").replaceChild(this.buildMainTable(), document.getElementById("bacsweeperboard").firstChild);
+        this.aSceneBoard._formatSceneWithBlankCells(this.scene.height, this.scene.width);
+        document.getElementById("bacsweeperboard").replaceChild(this.buildHTML(), document.getElementById("bacsweeperboard").firstChild);
     },
 
-    setMacrophages: function () {
+    placeMacrophagesInScene: function () {
         for (var k = 0; k < this.aMacrophagesPositions.length; k++) {
             var i = Math.floor(this.aMacrophagesPositions[k] / this.scene.width);
             var j = this.aMacrophagesPositions[k] - i * this.scene.width;
-            this.aSceneBoard[i][j].isMacrophage = true;
+            this.aSceneBoard[i][j].blIsMacrophage = true;
         }
     },
 
     setSelection: function (i, j) {
-        if (!this.aSceneBoard[i][j].isOpen) {
-            if (this.aSceneBoard[i][j].isSelected) {
-                this.aSceneBoard[i][j].isSelected = false;
+        if (!this.aSceneBoard[i][j].blIsOpened) {
+            if (this.aSceneBoard[i][j].blIsSelected) {
+                this.aSceneBoard[i][j].blIsSelected = false;
                 this.iMacrophagesCount++;
-                this.aSceneBoard[i][j].cell.className = "normal";
+                this.aSceneBoard[i][j].oCell.className = "normal";
             }
-            else if (!this.aSceneBoard[i][j].isSelected && this.iMacrophagesCount > 0) {
-                this.aSceneBoard[i][j].isSelected = true;
+            else if (!this.aSceneBoard[i][j].blIsSelected && this.iMacrophagesCount > 0) {
+                this.aSceneBoard[i][j].blIsSelected = true;
                 this.iMacrophagesCount--;
-                this.aSceneBoard[i][j].cell.className = "select";
+                this.aSceneBoard[i][j].oCell.className = "select";
             }
-            this.iCellCountMacrophages.firstChild.replaceData(0, this.iCellCountMacrophages.firstChild.nodeValue.length, "Scene - noch " + this.iMacrophagesCount + " Minen");
+            this.oCellCountMacrophages.firstChild.replaceData(0, this.oCellCountMacrophages.firstChild.nodeValue.length, "Scene - noch " + this.iMacrophagesCount + " Minen");
         }
     },
 
-    isFinished: function () {
+    sceneIsFinished: function () {
         for (var i = 0; i < this.scene.height; i++)
             for (var j = 0; j < this.scene.width; j++) {
-                if (!this.aSceneBoard[i][j].isMacrophage && !this.aSceneBoard[i][j].isOpen) {
+                if (!this.aSceneBoard[i][j].blIsMacrophage && !this.aSceneBoard[i][j].blIsOpened) {
                     return false;
                 }
             }
@@ -104,78 +98,78 @@ var BacSweeper = {
         this.blGameOver = true;
         for (var i = 0; i < this.scene.height; i++)
             for (var j = 0; j < this.scene.width; j++)
-                if (!this.aSceneBoard[i][j].isMacrophage) {
-                    this.aSceneBoard[i][j].cell.className = "open";
+                if (!this.aSceneBoard[i][j].blIsMacrophage) {
+                    this.aSceneBoard[i][j].oCell.className = "open";
                     if (this.aSceneBoard[i][j].iNumberOfMacrophagesSurround != 0) {
-                        this.aSceneBoard[i][j].cell.style.color = this.aFontcolor[this.aSceneBoard[i][j].iNumberOfMacrophagesSurround - 1];
-                        this.aSceneBoard[i][j].cell.firstChild.replaceData(0, this.aSceneBoard[i][j].cell.firstChild.nodeValue.length, this.aSceneBoard[i][j].iNumberOfMacrophagesSurround);
+                        this.aSceneBoard[i][j].oCell.style.color = this.aFontcolor[this.aSceneBoard[i][j].iNumberOfMacrophagesSurround - 1];
+                        this.aSceneBoard[i][j].oCell.firstChild.replaceData(0, this.aSceneBoard[i][j].oCell.firstChild.nodeValue.length, this.aSceneBoard[i][j].iNumberOfMacrophagesSurround);
                     }
                 }
-                else if (this.aSceneBoard[i][j].cell.className != "laststep")
-                    this.aSceneBoard[i][j].cell.className = "mine";
+                else if (this.aSceneBoard[i][j].oCell.className != "laststep")
+                    this.aSceneBoard[i][j].oCell.className = "mine";
     },*/
 
-    showFinishedMessage: function (complete) {
+    printFinishedMessage: function (blComplete) {
         this.blGameOver = true;
-        if (complete) {
-            console.log("Gratulation, Du hast alle Minen entdeckt!");
+        if (blComplete) {
+            console.log("Congratulations you won!");
         }
         else {
-            console.log("Ooh, ein nicht zu verachtender Schritt - in die falsche Richtung!");
+            console.log("Ooh, your colony died!");
         }
     },
 
-    // MARK: a cell is clicked
+    // MARK: a oCell is clicked
     openCell: function (i, j) {
-        if (this.aSceneBoard[i][j].isSelected) {
+        if (this.aSceneBoard[i][j].blIsSelected) {
             return;
         }
-        if (this.aSceneBoard[i][j].isMacrophage) {
+        if (this.aSceneBoard[i][j].blIsMacrophage) {
             this.blGameOver = true;
-            this.aSceneBoard[i][j].cell.className = "laststep";
-            this.showFinishedMessage(false);
+            this.aSceneBoard[i][j].oCell.className = "laststep";
+            this.printFinishedMessage(false);
             return;
         }
-        this.aSceneBoard[i][j].cell.className = "open";
-        this.aSceneBoard[i][j].isOpen = true;
+        this.aSceneBoard[i][j].oCell.className = "open";
+        this.aSceneBoard[i][j].blIsOpened = true;
         var arr = new Array();
 
         /*if (this.aSceneBoard[i][j].iNumberOfMacrophagesSurround == 0)
             arr = this.openCleanNeighborFields(i, j);
         else {
-            this.aSceneBoard[i][j].cell.style.color = this.aFontcolor[this.aSceneBoard[i][j].iNumberOfMacrophagesSurround - 1];
-            this.aSceneBoard[i][j].cell.firstChild.replaceData(0, this.aSceneBoard[i][j].cell.firstChild.nodeValue.length, this.aSceneBoard[i][j].iNumberOfMacrophagesSurround);
+            this.aSceneBoard[i][j].oCell.style.color = this.aFontcolor[this.aSceneBoard[i][j].iNumberOfMacrophagesSurround - 1];
+            this.aSceneBoard[i][j].oCell.firstChild.replaceData(0, this.aSceneBoard[i][j].oCell.firstChild.nodeValue.length, this.aSceneBoard[i][j].iNumberOfMacrophagesSurround);
         }*/
 
         for (var k = 0; k < arr.length; k++) {
             this.openCell(arr[k][0], arr[k][1]);
         }
-        if (this.isFinished()) {
-            this.showFinishedMessage(true);
+        if (this.sceneIsFinished()) {
+            this.printFinishedMessage(true);
         }
     },
 
     /*openCleanNeighborFields: function (i, j) {
-        var neighbors = this.getNeighboringCells(i, j);
+        var neighbors = this._getNeighboringCells(i, j);
         var fieldsWithoutNumber = new Array();
         for (var k = 0; k < neighbors.length; k++) {
-            if (this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].isMacrophage || this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].isOpen || this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].isSelected)
+            if (this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsMacrophage || this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsOpened || this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsSelected)
                 continue;
-            this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].cell.className = "open";
-            this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].isOpen = true;
+            this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].oCell.className = "open";
+            this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsOpened = true;
 
             if (this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].iNumberOfMacrophagesSurround == 0) {
                 fieldsWithoutNumber.push(neighbors[k]);
             }
             else {
-                this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].cell.style.color = this.aFontcolor[this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].iNumberOfMacrophagesSurround - 1];
-                this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].cell.firstChild.replaceData(0, this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].cell.firstChild.nodeValue.length, this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].iNumberOfMacrophagesSurround);
+                this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].oCell.style.color = this.aFontcolor[this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].iNumberOfMacrophagesSurround - 1];
+                this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].oCell.firstChild.replaceData(0, this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].oCell.firstChild.nodeValue.length, this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].iNumberOfMacrophagesSurround);
             }
         }
         return fieldsWithoutNumber;
     },*/
 
-    buildMainTable: function () {
+    buildHTML: function () {
         var table = document.createElement('table');
         var thead = document.createElement('thead');
         var tbody = document.createElement('tbody');
@@ -185,25 +179,25 @@ var BacSweeper = {
         table.appendChild(tfoot);
 
         var tr = document.createElement('tr');
-        this.iCellCountMacrophages.colSpan = this.scene.width;
-        tr.appendChild(this.iCellCountMacrophages);
+        this.oCellCountMacrophages.colSpan = this.scene.width;
+        tr.appendChild(this.oCellCountMacrophages);
         thead.appendChild(tr);
 
         for (var i = 0; i < this.scene.height; i++) {
             var tr = document.createElement('tr');
             for (var j = 0; j < this.scene.width; j++) {
-                this.aSceneBoard[i][j].cell = document.createElement('td');
-                this.aSceneBoard[i][j].cell.className = "normal";
-                this.aSceneBoard[i][j].cell.BacSweeperInstance = this;
-                this.aSceneBoard[i][j].cell.posX = this.aSceneBoard[i][j].x;
-                this.aSceneBoard[i][j].cell.posY = this.aSceneBoard[i][j].y;
+                this.aSceneBoard[i][j].oCell = document.createElement('td');
+                this.aSceneBoard[i][j].oCell.className = "normal";
+                this.aSceneBoard[i][j].oCell.BacSweeperInstance = this;
+                this.aSceneBoard[i][j].oCell.posX = this.aSceneBoard[i][j].iX;
+                this.aSceneBoard[i][j].oCell.posY = this.aSceneBoard[i][j].iY;
 
-                this.aSceneBoard[i][j].cell.onclick = function (evt) {
+                this.aSceneBoard[i][j].oCell.onclick = function (evt) {
 
-                    // MARK: when i click an a cell
+                    // MARK: when i click an a oCell
                     evt = (evt) ? evt : ((window.event) ? window.event : "");
-                    this.BacSweeperInstance.aMacrophagesPositions = this.BacSweeperInstance.placeMacrophages(this.posY * this.BacSweeperInstance.scene.width + this.posX);
-                    this.BacSweeperInstance.setMacrophages();
+                    this.BacSweeperInstance.aMacrophagesPositions = this.BacSweeperInstance._getMacrophagesPositions(this.posY * this.BacSweeperInstance.scene.width + this.posX);
+                    this.BacSweeperInstance.placeMacrophagesInScene();
                     this.BacSweeperInstance.countSurroundingMacrophages();
                     if (!this.BacSweeperInstance.blGameOver)
                         if (evt.ctrlKey) {
@@ -213,8 +207,8 @@ var BacSweeper = {
                             this.BacSweeperInstance.openCell(this.posY, this.posX);
                         }
                 };
-                this.aSceneBoard[i][j].cell.appendChild(document.createTextNode(String.fromCharCode(160)));
-                tr.appendChild(this.aSceneBoard[i][j].cell);
+                this.aSceneBoard[i][j].oCell.appendChild(document.createTextNode(""));
+                tr.appendChild(this.aSceneBoard[i][j].oCell);
             }
             tbody.appendChild(tr);
         }
@@ -227,9 +221,9 @@ var BacSweeper = {
     countSurroundingMacrophages: function () {
         for (var i = 0; i < this.scene.height; i++) {
             for (var j = 0; j < this.scene.width; j++) {
-                var neighbors = this.getNeighboringCells(i, j);
+                var neighbors = this._getNeighboringCells(i, j);
                 for (var k = 0; k < neighbors.length; k++) {
-                    if (this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].isMacrophage) {
+                    if (this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsMacrophage) {
                         this.aSceneBoard[i][j].iNumberOfMacrophagesSurround++;
                     }
                 }
@@ -237,7 +231,7 @@ var BacSweeper = {
         }
     },
 
-    getNeighboringCells: function (y, x) {
+    _getNeighboringCells: function (y, x) {
         var neighbors = new Array();
         for (var i = -1; i <= 1; i++) {
             for (var j = -1; j <= 1; j++) {
@@ -251,7 +245,7 @@ var BacSweeper = {
         return neighbors;
     },
 
-    placeMacrophages: function (iTabuValue) {
+    _getMacrophagesPositions: function (iTabuValue) {
         var aRandomNumbers = new Array();
 
         function Numsort(a, b) {
@@ -260,7 +254,7 @@ var BacSweeper = {
 
         do {
             var iRandomNumber = Math.floor(Math.random() * this.scene.width * this.scene.height);
-            if (iRandomNumber != iTabuValue && !aRandomNumbers.inArray(iRandomNumber)) {
+            if (iRandomNumber != iTabuValue && !aRandomNumbers._inArray(iRandomNumber)) {
                 aRandomNumbers.push(iRandomNumber);
             }
         }
@@ -271,7 +265,7 @@ var BacSweeper = {
 
 var isDOMContentLoaded = false;
 
-function addContentLoadListener() {
+function startingPoint() {
     if (document.addEventListener) {
         var DOMContentLoadFunction = function () {
             isDOMContentLoaded = true;
@@ -288,4 +282,4 @@ function addContentLoadListener() {
     };
 }
 
-addContentLoadListener();
+startingPoint();
