@@ -22,9 +22,9 @@ Array.prototype._formatSceneWithBlankCells = function (iWidth, iHeight) {
 // "Classes"
 function Scene() {
     // MARK: game scene
-    this.width = 15;
-    this.height = 15;
-    this.iMacrophagesCount = 5; // could be 1 to 5 macrophages
+    this.width = 7;
+    this.height = 7;
+    this.iMacrophagesCount = 3; // could be 1 to 5 macrophages
 }
 
 function Cell(y, x) {
