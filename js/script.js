@@ -69,7 +69,7 @@ var BacSweeper = {
         }
     },
 
-    setSelection: function (i, j) {
+    checkSelection: function (i, j) {
         if (!this.aSceneBoard[i][j].blIsOpened) {
             if (this.aSceneBoard[i][j].blIsSelected) {
                 this.aSceneBoard[i][j].blIsSelected = false;
