@@ -1,0 +1,63 @@
+			#minesweeper table {
+				border:1px solid #666;
+				margin: 2% auto;
+			}
+			
+			#minesweeper thead th {
+				margin:0;
+				padding:5px;
+				width:15px;
+				height:15px;
+				font-size:12px;
+			}
+			
+			#minesweeper tbody td {
+				margin:0;
+				padding:5px;
+				width:15px;
+				height:15px;
+				line-height:15px;
+				font-size:12px;
+				text-align: center;
+				font-weight: bold;
+				cursor: default;
+			}
+			
+			#minesweeper td.normal {
+				border: 1px solid #eee;
+				border-style: outset;
+				background-color: #e3e3e3;
+				background-image:none;
+			}
+			
+			#minesweeper td.open {
+				border: 1px solid #eee;
+				border-style: inset;
+			}
+			
+			#minesweeper td.select {
+				border: 1px solid #eee;
+				border-style: outset;
+				background: #e3e3e3 url(./gfx/minesweeper_flagg.png) no-repeat 50% 50%;
+			}
+			
+			#minesweeper td.mine {
+				border: 1px solid #eee;
+				border-style: inset;
+				background: #ccc url(./gfx/minesweeper_mine.png) no-repeat 50% 50%;
+			}
+			
+			#minesweeper td.laststep {
+				border: 1px solid #eee;
+				border-style: inset;
+				background: #ff0000 url(./gfx/minesweeper_mine.png) no-repeat 50% 50%;
+			}			
+			
+			#minesweeper tfoot td {
+				font-size: x-small;
+			}
+			
+			#minesweeper tfoot td span{
+				color: #112A5D;
+				cursor: pointer;
+			}
