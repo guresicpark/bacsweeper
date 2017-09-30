@@ -53,7 +53,7 @@ var BacSweeper = {
         this.scene = new Scene();
         this.iMacrophagesCount = this.scene.iMacrophagesCount;
         this.oCellCountMacrophages = document.createElement('th');
-        this.oCellCountMacrophages.appendChild(document.createTextNode("Scene - there are " + this.iMacrophagesCount + " Macrophages"));
+        this.oCellCountMacrophages.appendChild(document.createTextNode("This scene has " + this.iMacrophagesCount + " macrophages"));
         this.blGameOver = false;
         this.blIsFirstClick = false;
         this.aSceneBoard._formatSceneWithBlankCells(this.scene.height, this.scene.width);
@@ -269,7 +269,7 @@ function startingPoint() {
     if (document.addEventListener) {
         var DOMContentLoadFunction = function () {
             isDOMContentLoaded = true;
-            BacSweeper.init(1);
+            BacSweeper.init(1); // first entry point
         };
         document.addEventListener("DOMContentLoaded", DOMContentLoadFunction, false);
     }
