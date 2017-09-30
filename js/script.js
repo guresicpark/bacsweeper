@@ -45,11 +45,9 @@ var BacSweeper = {
     blGameOver: false,
     blIsFirstClick: false,
     aFontcolor: new Array("blue", "green", "red", "darkblue", "darkred", "violet", "orange", "black"),
-    aMacrophagesPositions: new Array(),
+    aMacrophagesPosition: new Array(),
 
     init: function () {
-
-        // MARK: initialisation of the whole game
         this.scene = new Scene();
         this.iMacrophagesCount = this.scene.iMacrophagesCount;
         this.oCellCountMacrophages = document.createElement('th');
@@ -57,13 +55,16 @@ var BacSweeper = {
         this.blGameOver = false;
         this.blIsFirstClick = false;
         this.aSceneBoard._formatSceneWithBlankCells(this.scene.height, this.scene.width);
-        document.getElementById("bacsweeperboard").replaceChild(this.buildHTML(), document.getElementById("bacsweeperboard").firstChild);
+        document.getElementById("bacsweeperboard").replaceChild(
+            this.buildHTML(),
+            document.getElementById("bacsweeperboard").firstChild
+        );
     },
 
     placeMacrophagesInScene: function () {
-        for (var k = 0; k < this.aMacrophagesPositions.length; k++) {
-            var i = Math.floor(this.aMacrophagesPositions[k] / this.scene.width);
-            var j = this.aMacrophagesPositions[k] - i * this.scene.width;
+        for (var k = 0; k < this.aMacrophagesPosition.length; k++) {
+            var i = Math.floor(this.aMacrophagesPosition[k] / this.scene.width);
+            var j = this.aMacrophagesPosition[k] - i * this.scene.width;
             this.aSceneBoard[i][j].blIsMacrophage = true;
         }
     },
@@ -170,6 +171,7 @@ var BacSweeper = {
     },*/
 
     buildHTML: function () {
+        // MARK: initialisation of the whole game
         var table = document.createElement('table');
         var thead = document.createElement('thead');
         var tbody = document.createElement('tbody');
@@ -189,23 +191,17 @@ var BacSweeper = {
                 this.aSceneBoard[i][j].oCell = document.createElement('td');
                 this.aSceneBoard[i][j].oCell.className = "normal";
                 this.aSceneBoard[i][j].oCell.BacSweeperInstance = this;
-                this.aSceneBoard[i][j].oCell.posX = this.aSceneBoard[i][j].iX;
-                this.aSceneBoard[i][j].oCell.posY = this.aSceneBoard[i][j].iY;
-
+                this.aSceneBoard[i][j].oCell.iPosX = this.aSceneBoard[i][j].iX;
+                this.aSceneBoard[i][j].oCell.iPosY = this.aSceneBoard[i][j].iY;
                 this.aSceneBoard[i][j].oCell.onclick = function (evt) {
-
-                    // MARK: when i click an a oCell
+                    // MARK: when i a cell is clicked
                     evt = (evt) ? evt : ((window.event) ? window.event : "");
-                    this.BacSweeperInstance.aMacrophagesPositions = this.BacSweeperInstance._getMacrophagesPositions(this.posY * this.BacSweeperInstance.scene.width + this.posX);
+                    this.BacSweeperInstance.aMacrophagesPosition = this.BacSweeperInstance._getMacrophagesPosition(this.iPosY * this.BacSweeperInstance.scene.width + this.iPosX);
                     this.BacSweeperInstance.placeMacrophagesInScene();
                     this.BacSweeperInstance.countSurroundingMacrophages();
-                    if (!this.BacSweeperInstance.blGameOver)
-                        if (evt.ctrlKey) {
-                            this.BacSweeperInstance.setSelection(this.posY, this.posX);
-                        }
-                        else {
-                            this.BacSweeperInstance.openCell(this.posY, this.posX);
-                        }
+                    if (!this.BacSweeperInstance.blGameOver) {
+                        this.BacSweeperInstance.openCell(this.iPosY, this.iPosX);
+                    }
                 };
                 this.aSceneBoard[i][j].oCell.appendChild(document.createTextNode(""));
                 tr.appendChild(this.aSceneBoard[i][j].oCell);
@@ -245,7 +241,7 @@ var BacSweeper = {
         return neighbors;
     },
 
-    _getMacrophagesPositions: function (iTabuValue) {
+    _getMacrophagesPosition: function (iTabuValue) {
         var aRandomNumbers = new Array();
 
         function Numsort(a, b) {
