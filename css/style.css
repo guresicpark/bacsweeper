@@ -1,16 +1,16 @@
-#minesweeper table {
+#bacsweeperboard table {
     border: 1px solid #666;
     margin: 2% auto;
 }
 
-#minesweeper thead th {
+#bacsweeperboard thead th {
     margin: 0;
     padding: 5px;
     width: 15px;
     height: 15px;
 }
 
-#minesweeper tbody td {
+#bacsweeperboard tbody td {
     margin: 0;
     padding: 5px;
     width: 15px;
@@ -20,40 +20,40 @@
     cursor: default;
 }
 
-#minesweeper td.normal {
+#bacsweeperboard td.normal {
     border: 1px solid #eee;
     border-style: outset;
     background-color: #e3e3e3;
     background-image: none;
 }
 
-#minesweeper td.open {
+#bacsweeperboard td.open {
     border: 1px solid #eee;
     border-style: inset;
 }
 
-#minesweeper td.select {
+#bacsweeperboard td.select {
     border: 1px solid #eee;
     border-style: outset;
     background: #e3e3e3 url(../gfx/minesweeper_flagg.png) no-repeat 50% 50%;
 }
 
-#minesweeper td.mine {
+#bacsweeperboard td.mine {
     border: 1px solid #eee;
     border-style: inset;
     background: #ccc url(../gfx/minesweeper_mine.png) no-repeat 50% 50%;
 }
 
-#minesweeper td.laststep {
+#bacsweeperboard td.laststep {
     border: 1px solid #eee;
     border-style: inset;
     background: #ff0000 url(../gfx/minesweeper_mine.png) no-repeat 50% 50%;
 }
 
-#minesweeper tfoot td {
+#bacsweeperboard tfoot td {
 }
 
-#minesweeper tfoot td span {
+#bacsweeperboard tfoot td span {
     color: #112A5D;
     cursor: pointer;
 }
