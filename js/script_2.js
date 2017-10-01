@@ -206,13 +206,13 @@ var BacSweeper = {
         oTable.appendChild(oTFoot);
 
         var oTr = document.createElement('tr');
-        this.oThSceneBoard.colSpan = this.iSceneWidth;
+        this.oThSceneBoard.colSpan = this.scene.iWidth;
         oTr.appendChild(this.oThSceneBoard);
         oTHead.appendChild(oTr);
 
-        for (var i = 0; i < this.iSceneHeight; i++) {
+        for (var i = 0; i < this.scene.iHeight; i++) {
             var oTr = document.createElement('tr');
-            for (var j = 0; j < this.iSceneWidth; j++) {
+            for (var j = 0; j < this.scene.iWidth; j++) {
                 this.aSceneBoard[i][j].oTd = document.createElement('oTd');
                 this.aSceneBoard[i][j].oTd.className = "normal";
                 this.aSceneBoard[i][j].oTd.bacSweeperInstance = this;
@@ -241,35 +241,13 @@ var BacSweeper = {
         return oTable;
     },
 
-    /*
-    * Count surrounding
-    * 0 = empty
-    * 1 = bacteria
-    * 2 = macrophages
-    */
-    countSurroundingMacrophages: function (piType) {
-        var iCount = 0;
+    countSurroundingMacrophages: function () {
         for (var i = 0; i < this.scene.iHeight; i++) {
             for (var j = 0; j < this.scene.iWidth; j++) {
                 var neighbors = this.getNeighboringCells(i, j);
                 for (var k = 0; k < neighbors.length; k++) {
-                    blElement = false;
-                    switch (piType) {
-                        case 1:
-                            blElement = this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsBacteria;
-                            break;
-
-                        case 2:
-                            blElement = this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsMacrophage;
-                            break;
-
-                        default:
-                            blElement = !this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsBacteria
-                                && !this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsMacrophage;
-                            break;
-                    }
-                    if (blElement) {
-                        iCount++;
+                    if (this.aSceneBoard[neighbors[k][0]][neighbors[k][1]].blIsMacrophage) {
+                        this.aSceneBoard[i][j].iMacrophagesSurround++;
                     }
                 }
             }
